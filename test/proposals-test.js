@@ -321,7 +321,7 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
     const mtx = await mswallet.getProposalMTX(proposal.id);
     const paths = await mswallet.getInputPaths(mtx);
     const rings = testUtils.getMTXRings(
-      mtx, paths, priv1, [xpub1, xpub2], 2, WITNESS
+      mtx, paths.values(), priv1, [xpub1, xpub2], 2, WITNESS
     );
 
     const sigs = testUtils.getMTXSignatures(mtx, rings);
@@ -375,7 +375,7 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
 
     // approve by second cosigner
     const rings2 = testUtils.getMTXRings(
-      mtx, paths, priv2, [xpub1, xpub2], 2, WITNESS
+      mtx, paths.values(), priv2, [xpub1, xpub2], 2, WITNESS
     );
     const sigs2 = testUtils.getMTXSignatures(mtx, rings2);
 
@@ -418,7 +418,7 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
 
     { // cosigner2
       const rings = testUtils.getMTXRings(
-        mtx, paths, priv2, xpubs, 2, WITNESS
+        mtx, paths.values(), priv2, xpubs, 2, WITNESS
       );
 
       const sigs = testUtils.getMTXSignatures(mtx, rings);
@@ -437,7 +437,7 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
 
     { // cosigner3
       const rings = testUtils.getMTXRings(
-        mtx, paths, priv3, xpubs, 2, WITNESS
+        mtx, paths.values(), priv3, xpubs, 2, WITNESS
       );
       const sigs = testUtils.getMTXSignatures(mtx, rings);
       assert.strictEqual(sigs.length, 2);
@@ -470,7 +470,7 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
     const paths = await mswallet.getInputPaths(mtx);
 
     const rings = testUtils.getMTXRings(
-      mtx, paths, priv1, [xpub1, xpub2], 2, WITNESS
+      mtx, paths.values(), priv1, [xpub1, xpub2], 2, WITNESS
     );
     const signatures = testUtils.getMTXSignatures(mtx, rings);
 
@@ -505,7 +505,7 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
       const paths = await mswallet.getInputPaths(mtx);
 
       const rings = testUtils.getMTXRings(
-        mtx, paths, priv, [xpub1, xpub2], 2, WITNESS
+        mtx, paths.values(), priv, [xpub1, xpub2], 2, WITNESS
       );
       const signatures = testUtils.getMTXSignatures(mtx, rings);
 
@@ -573,7 +573,8 @@ describe(`MultisigProposals ${WITNESS ? 'witness' : 'legacy'}`, function () {
 
     const sign = async (priv) => {
       mtx.inputs.forEach((_, i) => {
-        const path = paths[i];
+        const path = paths.get(i.getAddress());
+        assert(path);
 
         // derive correct priv key
         const _priv = priv.derive(path.branch).derive(path.index);
